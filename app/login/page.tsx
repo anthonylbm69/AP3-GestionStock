@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import {useRouter} from "next/navigation";
+import LoginForm from "@/components/login-form";
 
 export default function Page() {
     const router = useRouter();
@@ -16,6 +17,8 @@ export default function Page() {
             >
                 se connecter
             </button>
+
+            <LoginForm/>
         </>
     )
 }
