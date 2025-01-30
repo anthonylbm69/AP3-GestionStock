@@ -1,18 +1,23 @@
-'use server'
+'use server';
 
-import {redirect} from "next/navigation";
-import {error} from "next/dist/build/output/log";
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
 
-export async function LoginAction (formData: FormData){
+export async function LoginAction(formData: FormData) {
+    const supabase = await createClient()
     const data = {
         email: formData.get('email') as string,
         password: formData.get('password') as string,
     }
 
-    if (data.email === "admin@example.com" && data.password === "motdepassehash") {
-        redirect("/")
-    } else {
-        redirect("/error")
-        console.log(error())
+    const { error } = await supabase.auth.signInWithPassword(data)
+
+    if (error) {
+        redirect('/error')
     }
+
+    revalidatePath('/', 'layout')
+    redirect('/')
+
 }

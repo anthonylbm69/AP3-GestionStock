@@ -4,6 +4,7 @@ import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 export const FloatingNav = ({
                                 navItems,
@@ -18,10 +19,10 @@ export const FloatingNav = ({
     const { scrollYProgress } = useScroll();
     const [visible, setVisible] = useState(true);
     const [isScrollable, setIsScrollable] = useState(false);
+    const [user, setUser] = useState<{ email: string; nom?: string } | null>(null);
     const router = useRouter();
 
     useEffect(() => {
-        // Check if the page is scrollable
         const checkScrollable = () => {
             const isPageScrollable =
                 document.documentElement.scrollHeight >
@@ -36,6 +37,45 @@ export const FloatingNav = ({
             window.removeEventListener("resize", checkScrollable);
         };
     }, []);
+
+    useEffect(() => {
+        const supabase = createClient();
+
+        const fetchUser = async () => {
+            const { data } = await supabase.auth.getSession();
+
+            if (data.session) {
+                const { user } = data.session;
+                // Récupérer les informations supplémentaires de l'utilisateur
+                const { data: userData, error } = await supabase
+                    .from("Utilisateur")
+                    .select("nom")
+                    .eq("email", user.email)
+                    .single();
+
+                if (!error && userData) {
+                    setUser({ email: user.email, nom: userData.nom });
+                } else {
+                    setUser({ email: user.email });
+                }
+            }
+        };
+
+        fetchUser();
+
+        // Écoute les changements de session
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session) {
+                fetchUser(); // Recharge les données de l'utilisateur après la connexion
+            } else {
+                setUser(null); // Déconnecte l'utilisateur si la session est terminée
+            }
+        });
+
+        return () => {
+            authListener.subscription.unsubscribe(); // Nettoie l'abonnement à l'écoute des changements
+        };
+    }, [router]);
 
     useMotionValueEvent(scrollYProgress, "change", (current) => {
         if (!isScrollable) {
@@ -60,6 +100,13 @@ export const FloatingNav = ({
     });
 
     const handleLoginClick = () => {
+        router.push("/login");
+    };
+
+    const handleLogout = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        setUser(null);
         router.push("/login");
     };
 
@@ -92,13 +139,27 @@ export const FloatingNav = ({
                     <span className="hidden sm:block text-sm">{navItem.name}</span>
                 </Link>
             ))}
-            <button
-                onClick={handleLoginClick}
-                className="border text-sm font-medium relative border-neutral-200 dark:border-white/[0.2] text-black dark:text-white px-4 py-2 rounded-full"
-            >
-                <span>Login</span>
-                <span className="absolute inset-x-0 w-1/2 mx-auto -bottom-px bg-gradient-to-r from-transparent via-blue-500 to-transparent h-px" />
-            </button>
+
+            {user ? (
+                <div className="flex items-center space-x-4">
+                    <span className="text-sm font-medium text-black dark:text-white">
+                        Bonjour, {user.nom ?? user.email}
+                    </span>
+                    <button
+                        onClick={handleLogout}
+                        className="border text-sm font-medium relative border-neutral-200 dark:border-white/[0.2] text-black dark:text-white px-4 py-2 rounded-full"
+                    >
+                        <span>Déconnexion</span>
+                    </button>
+                </div>
+            ) : (
+                <button
+                    onClick={handleLoginClick}
+                    className="border text-sm font-medium relative border-neutral-200 dark:border-white/[0.2] text-black dark:text-white px-4 py-2 rounded-full"
+                >
+                    <span>Login</span>
+                </button>
+            )}
         </motion.nav>
     );
 };

@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase/supabaseClient";
 import {
@@ -54,7 +54,7 @@ const EditStock = () => {
     }, []);
 
     const handleEdit = (id: number) => {
-        router.push(`/edit-stock/${id}`);
+        router.push(`/edit-stock?id=${id}`);
     };
 
     const handleView = (id: number) => {
@@ -84,11 +84,6 @@ const EditStock = () => {
     };
 
     const handleAddStock = async () => {
-        if (!newStock.nom || !newStock.description || !newStock.type || newStock.prix <= 0 || newStock.quantiteDisponible <= 0) {
-            alert("Tous les champs doivent être remplis correctement.");
-            return;
-        }
-
         const { data, error } = await supabase
             .from("Stock")
             .insert([newStock])
@@ -108,6 +103,7 @@ const EditStock = () => {
             });
         }
     };
+
 
     if (loading) {
         return <p>Chargement des données...</p>;
@@ -153,7 +149,7 @@ const EditStock = () => {
             <button className="p-[3px] relative mt-5" onClick={() => setShowAddPopup(true)}>
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
                 <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
-                    Ajouter un Stock
+                    Ajouter un Article
                 </div>
             </button>
 

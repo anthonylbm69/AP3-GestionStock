@@ -28,7 +28,6 @@ export default function EditOneStock() {
         prix: 0,
     });
 
-    // Charger les données du stock à éditer
     useEffect(() => {
         if (!stockId) return;
 
@@ -36,14 +35,14 @@ export default function EditOneStock() {
             const { data, error } = await supabase
                 .from('Stock')
                 .select('*')
-                .eq('id', parseInt(stockId)) // Assurez-vous de convertir l'ID en nombre
+                .eq('id', parseInt(stockId))
                 .single();
 
             if (error) {
                 console.error("Erreur lors de la récupération des détails du stock :", error);
             } else {
                 setStock(data);
-                setFormData(data); // Remplir le formulaire avec les données existantes
+                setFormData(data);
             }
             setLoading(false);
         };
@@ -51,7 +50,6 @@ export default function EditOneStock() {
         fetchStockDetails();
     }, [stockId]);
 
-    // Fonction pour gérer les changements dans le formulaire
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({
@@ -60,7 +58,6 @@ export default function EditOneStock() {
         });
     };
 
-    // Fonction pour soumettre le formulaire
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -72,9 +69,13 @@ export default function EditOneStock() {
         if (error) {
             console.error("Erreur lors de la mise à jour du stock :", error);
         } else {
-            router.push('/'); // Redirige vers la page principale après la mise à jour
+            router.push('/gestion-stock');
         }
     };
+
+    const handleReturn = () => {
+        router.push('/gestion-stock')
+    }
 
     if (loading) return <p>Chargement des données...</p>;
     if (!stock) return <p>Stock non trouvé</p>;
@@ -152,7 +153,7 @@ export default function EditOneStock() {
                     </button>
                     <button
                         type="button"
-                        onClick={() => router.push('/')}
+                        onClick={handleReturn}
                         className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400"
                     >
                         Annuler

@@ -1,48 +1,43 @@
 'use client'
-import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react'
+import BarCharts from "@/components/barChart";
+import { ChartData } from "@/components/chartData";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Clock, ListOrdered } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
-    const router = useRouter();
-
+const Dashboard = () => {
     return (
-        <>
-
-            <button
-                onClick={() => router.push("/login")}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Login
-            </button>
-            <button
-                onClick={() => router.push("/signup")}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Signup
-            </button>
-            <button
-                onClick={() => router.push("/order")}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Order
-            </button>
-            <button
-                onClick={() => router.push("/stock")}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Stock
-            </button>
-            <button
-                onClick={() => router.push("/edit-stock")}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Edit stock
-            </button>
-            <button
-                onClick={() => router.push("/gestion-order")}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Gestion Order
-            </button>
-        </>
+        <div className="grid grid-cols-2 gap-4 mt-20">
+            <Card>
+                <BarCharts />
+            </Card>
+            <Card>
+                <CardHeader className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                        <Clock className="w-6 h-6 text-yellow-500" />
+                        <CardTitle>Commandes en attente</CardTitle>
+                    </div>
+                    <Link href="/gestion-order">
+                        <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                            <ListOrdered className="w-4 h-4" />
+                            <span>Voir</span>
+                        </Button>
+                    </Link>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-2xl font-bold">50 commandes en attente</p>
+                    <p className="text-sm text-gray-500">15 urgentes • 20 en cours de validation • 15 en préparation</p>
+                    <Progress value={50} className="mt-3" />
+                </CardContent>
+            </Card>
+            <Card>
+                <ChartData />
+            </Card>
+        </div>
     );
-}
+};
+
+export default Dashboard;

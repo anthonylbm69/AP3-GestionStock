@@ -9,6 +9,7 @@ import {
     TableHead,
     TableCell,
 } from "@/components/ui/table";
+import {useRouter} from "next/navigation";
 
 type Stock = {
     id: number;
@@ -23,6 +24,8 @@ const OrderInterface = () => {
     const [medicaments, setMedicaments] = useState<Stock[]>([]);
     const [cart, setCart] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const router = useRouter();
 
     useEffect(() => {
         const fetchMedications = async () => {
@@ -86,24 +89,29 @@ const OrderInterface = () => {
     );
 
     const placeOrder = async () => {
-        const { error } = await supabase.from("Commande").insert([
-            {
-                items: cart.map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    quantity: item.quantity,
-                })),
-                total: totalCost,
-                date: new Date(),
-            },
-        ]);
+        /*await supabase
+            .from("Commande")
+            .insert([
+                {
+                    idUtilisateur: 1, // Remplacez par l'ID de l'utilisateur connecté
+                    total: totalCost,
+                    dateCommande: new Date(),
+                },
+            ])
+            .single(); // Retourne une seule commande*/
+        router.push('/order-in-progress')
 
-        if (error) {
-            console.error("Erreur lors de la commande : ", error);
-        } else {
-            alert("Commande passée avec succès !");
-            setCart([]);
+    };
+
+    const handleQuantityChange = (e, itemId) => {
+        const newQuantity = parseInt(e.target.value, 10);
+
+        if (isNaN(newQuantity) || newQuantity < 1) {
+            return;
         }
+        setCart(cart.map((item) =>
+            item.id === itemId ? { ...item, quantity: newQuantity } : item
+        ));
     };
 
     if (loading) {
@@ -158,7 +166,15 @@ const OrderInterface = () => {
                             {cart.map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell>{item.name}</TableCell>
-                                    <TableCell>{item.quantity}</TableCell>
+                                    <TableCell>
+                                        <input
+                                            type="number"
+                                            value={item.quantity}
+                                            min="1"
+                                            onChange={(e) => handleQuantityChange(e, item.id)}
+                                            className="w-16 text-center border px-2 py-1 rounded-md"
+                                        />
+                                    </TableCell>
                                     <TableCell>
                                         <div className="flex space-x-2">
                                             <button
