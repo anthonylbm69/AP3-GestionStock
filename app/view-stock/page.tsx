@@ -54,7 +54,6 @@ const ViewStock = () => {
                         <TableHead>Description</TableHead>
                         <TableHead>Quantite Disponible</TableHead>
                         <TableHead>Prix(en €)</TableHead>
-                        <TableHead>Type</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -64,7 +63,6 @@ const ViewStock = () => {
                             <TableCell>{stocks.description}</TableCell>
                             <TableCell>{stocks.quantiteDisponible}</TableCell>
                             <TableCell>{stocks.prix} €</TableCell>
-                            <TableCell>{stocks.type}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

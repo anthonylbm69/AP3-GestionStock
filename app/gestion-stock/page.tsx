@@ -118,7 +118,6 @@ const EditStock = () => {
                         <TableHead>Description</TableHead>
                         <TableHead>Quantité Disponible</TableHead>
                         <TableHead>Prix (en €)</TableHead>
-                        <TableHead>Type</TableHead>
                         <TableHead>Action</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -129,7 +128,6 @@ const EditStock = () => {
                             <TableCell>{stocks.description}</TableCell>
                             <TableCell>{stocks.quantiteDisponible}</TableCell>
                             <TableCell>{stocks.prix} €</TableCell>
-                            <TableCell>{stocks.type}</TableCell>
                             <TableCell className="flex gap-4">
                                 <button onClick={() => handleDeleteClick(stocks.id)} className="text-red-500 hover:text-red-700">
                                     <FaRegTrashAlt size={20} />
@@ -145,14 +143,11 @@ const EditStock = () => {
                     ))}
                 </TableBody>
             </Table>
-
-            <button className="p-[3px] relative mt-5" onClick={() => setShowAddPopup(true)}>
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-                <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+            <div className="mt-2 flex justify-center">
+                <button className="shadow-[0_0_0_3px_#000000_inset] px-6 py-2 bg-transparent border border-black dark:border-white dark:text-white text-black rounded-lg font-bold transform hover:-translate-y-1 transition duration-400" onClick={() => setShowAddPopup(true)}>
                     Ajouter un Article
-                </div>
-            </button>
-
+                </button>
+            </div>
             {showPopup && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-lg shadow-lg text-center">

@@ -74,8 +74,8 @@ enum StockType {
 
 enum CommandeStatut {
   en_attente
-  validee
-  invalidee
+  valide
+  invalide
 }
 
 enum MouvementType {

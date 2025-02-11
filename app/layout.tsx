@@ -30,7 +30,6 @@ export default function RootLayout({
       >
       <FloatingNav
           navItems={[
-              { link: "/", name: "Accueil" },
               { link: "/order", name: "Commande" },
               { link: "/stock", name: "Stock" },
           ]}

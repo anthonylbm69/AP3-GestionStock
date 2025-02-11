@@ -1,15 +1,8 @@
-'use client';
+'use client'
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase/supabaseClient";
-import {
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableHead,
-    TableCell,
-} from "@/components/ui/table";
-import {useRouter} from "next/navigation";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 
 type Stock = {
     id: number;
@@ -24,14 +17,11 @@ const OrderInterface = () => {
     const [medicaments, setMedicaments] = useState<Stock[]>([]);
     const [cart, setCart] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
-
     const router = useRouter();
 
     useEffect(() => {
         const fetchMedications = async () => {
-            const { data, error } = await supabase
-                .from("Stock")
-                .select("*");
+            const { data, error } = await supabase.from("Stock").select("*");
             if (error) {
                 console.error("Erreur lors de la récupération des médicaments : ", error);
             } else {
@@ -51,31 +41,27 @@ const OrderInterface = () => {
         fetchMedications();
     }, []);
 
+    // Charger le panier depuis localStorage au montage du composant
+    useEffect(() => {
+        const savedCart = localStorage.getItem("cart");
+        if (savedCart) {
+            setCart(JSON.parse(savedCart));
+        }
+    }, []);
+
+    // Sauvegarder le panier dans localStorage à chaque mise à jour
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }, [cart]);
+
     const addToCart = (medicament: Stock) => {
         const exists = cart.find((item) => item.id === medicament.id);
         if (exists) {
             setCart(cart.map((item) =>
-                item.id === medicament.id
-                    ? { ...item, quantity: (item.quantity || 1) + 1 }
-                    : item
+                item.id === medicament.id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
             ));
         } else {
             setCart([...cart, { ...medicament, quantity: 1 }]);
-        }
-    };
-
-    const removeOneFromCart = (id: number) => {
-        const item = cart.find((medicament) => medicament.id === id);
-        if (item) {
-            if (item.quantity && item.quantity > 1) {
-                setCart(cart.map((medicament) =>
-                    medicament.id === id
-                        ? { ...medicament, quantity: medicament.quantity - 1 }
-                        : medicament
-                ));
-            } else {
-                removeFromCart(id);
-            }
         }
     };
 
@@ -83,35 +69,10 @@ const OrderInterface = () => {
         setCart(cart.filter((item) => item.id !== id));
     };
 
-    const totalCost = cart.reduce(
-        (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
-        0
-    );
+    const totalCost = cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
 
-    const placeOrder = async () => {
-        /*await supabase
-            .from("Commande")
-            .insert([
-                {
-                    idUtilisateur: 1, // Remplacez par l'ID de l'utilisateur connecté
-                    total: totalCost,
-                    dateCommande: new Date(),
-                },
-            ])
-            .single(); // Retourne une seule commande*/
-        router.push('/order-in-progress')
-
-    };
-
-    const handleQuantityChange = (e, itemId) => {
-        const newQuantity = parseInt(e.target.value, 10);
-
-        if (isNaN(newQuantity) || newQuantity < 1) {
-            return;
-        }
-        setCart(cart.map((item) =>
-            item.id === itemId ? { ...item, quantity: newQuantity } : item
-        ));
+    const placeOrder = () => {
+        router.push('/order-in-progress');
     };
 
     if (loading) {
@@ -123,7 +84,7 @@ const OrderInterface = () => {
             <h1 className="text-2xl font-bold mb-4">Interface de Commande</h1>
             <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2">
-                    <h2 className="text-xl font-semibold mb-2">Médicaments et matériels disponibles</h2>
+                    <h2 className="text-xl font-semibold mb-2">Médicaments disponibles</h2>
                     <Table className="border border-gray-200">
                         <TableHeader>
                             <TableRow>
@@ -166,45 +127,16 @@ const OrderInterface = () => {
                             {cart.map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell>{item.name}</TableCell>
+                                    <TableCell>{item.quantity}</TableCell>
                                     <TableCell>
-                                        <input
-                                            type="number"
-                                            value={item.quantity}
-                                            min="1"
-                                            onChange={(e) => handleQuantityChange(e, item.id)}
-                                            className="w-16 text-center border px-2 py-1 rounded-md"
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={() => removeOneFromCart(item.id)}
-                                                className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                                            >
-                                                -
-                                            </button>
-                                            <button
-                                                onClick={() => addToCart(item)}
-                                                className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                                            >
-                                                +
-                                            </button>
-                                            <button
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="px-2 py-1 text-red-500 hover:underline"
-                                            >
-                                                Supprimer
-                                            </button>
-                                        </div>
+                                        <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:underline">Supprimer</button>
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                     <div className="mt-4">
-                        <p className="text-lg font-semibold">
-                            Total : {totalCost.toFixed(2)} €
-                        </p>
+                        <p className="text-lg font-semibold">Total : {totalCost.toFixed(2)} €</p>
                     </div>
                     <button
                         onClick={placeOrder}
