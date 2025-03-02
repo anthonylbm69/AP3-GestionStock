@@ -56,7 +56,6 @@ export default function Page() {
                     </button>
                 </BackgroundGradient>
 
-                {/* Carte pour gérer le stock (seulement pour l'admin) */}
                 {role === 'admin' && (
                     <BackgroundGradient className="rounded-[22px] max-w-md p-4 sm:p-10 bg-white dark:bg-zinc-900 shadow-lg">
                         <Image

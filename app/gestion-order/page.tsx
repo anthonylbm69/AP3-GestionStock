@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,6 +20,7 @@ export default function Page() {
     const [selectedCommande, setSelectedCommande] = useState<Commande | null>(null);
     const [newStatus, setNewStatus] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         if (!isLoading && user) {
@@ -39,7 +39,7 @@ export default function Page() {
                 id,
                 statut,
                 Utilisateur ( nom, prenom ),
-                DetailsCommande ( quantite, Stock ( id, prix, quantiteDisponible ) )
+                DetailsCommande ( quantite, Stock ( nom, prix, quantiteDisponible ) )
             `);
 
         if (error) {
@@ -57,58 +57,39 @@ export default function Page() {
                 client: `${commande.Utilisateur.nom} ${commande.Utilisateur.prenom}`,
                 montant: montantTotal.toFixed(2),
                 statut: commande.statut,
+                details: commande.DetailsCommande?.map((detail) => ({
+                    produit: detail.Stock.nom,
+                    quantite: detail.quantite
+                }))
             };
         });
 
         setCommandes(commandesAvecMontant);
     };
 
-    const openModal = (commande: Commande) => {
+    const openDetailsModal = (commande: Commande) => {
         setSelectedCommande(commande);
-        setNewStatus(commande.statut);
         setIsModalOpen(true);
     };
 
-    const closeModal = () => {
+    const closeDetailsModal = () => {
         setIsModalOpen(false);
+        setSelectedCommande(null);
+    };
+
+    const openEditModal = (commande: Commande) => {
+        setSelectedCommande(commande);
+        setNewStatus(commande.statut);
+        setIsEditModalOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
         setSelectedCommande(null);
     };
 
     const updateCommandeStatus = async () => {
         if (!selectedCommande) return;
-
-        if (newStatus === "valide") {
-            const { data: details, error: fetchError } = await supabase
-                .from("DetailsCommande")
-                .select("quantite, Stock (id, quantiteDisponible)")
-                .eq("idCommande", selectedCommande.id);
-
-            if (fetchError) {
-                console.error("Erreur lors de la récupération des détails de commande :", fetchError);
-                return;
-            }
-
-            const updates = details.map(async (detail) => {
-                if (detail.quantite > detail.Stock.quantiteDisponible) {
-                    console.error(`Stock insuffisant pour l'article ID ${detail.Stock.id}`);
-                    return;
-                }
-
-                await supabase.from("Stock").update({
-                    quantiteDisponible: detail.Stock.quantiteDisponible - detail.quantite
-                }).eq("id", detail.Stock.id);
-
-                await supabase.from("Mouvement").insert({
-                    idStock: detail.Stock.id,
-                    type: "sortie",
-                    quantite: detail.quantite,
-                    idCommande: selectedCommande.id,
-                    dateMouvement: new Date()
-                });
-            });
-
-            await Promise.all(updates);
-        }
 
         const { error } = await supabase
             .from("Commande")
@@ -121,7 +102,7 @@ export default function Page() {
             setCommandes(commandes.map((cmd) =>
                 cmd.id === selectedCommande.id ? { ...cmd, statut: newStatus } : cmd
             ));
-            closeModal();
+            closeEditModal();
         }
     };
 
@@ -153,13 +134,13 @@ export default function Page() {
                                     <TableCell>{commande.statut}</TableCell>
                                     <TableCell className="flex gap-2">
                                         <button
-                                            onClick={() => router.push(`/gestion-order/${commande.id}`)}
+                                            onClick={() => openDetailsModal(commande)}
                                             className="text-green-500 hover:text-green-700"
                                         >
                                             <FaEye size={20} />
                                         </button>
                                         <button
-                                            onClick={() => openModal(commande)}
+                                            onClick={() => openEditModal(commande)}
                                             className="text-blue-500 hover:text-blue-700"
                                         >
                                             <FaEdit size={20} />
@@ -172,21 +153,48 @@ export default function Page() {
                 </div>
             </div>
 
-            {isModalOpen && (
+            {/* Modal Détails de la Commande */}
+            {isModalOpen && selectedCommande && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <h2 className="text-xl font-bold mb-4">Modifier le statut</h2>
-                        <select
-                            value={newStatus}
-                            onChange={(e) => setNewStatus(e.target.value)}
-                            className="w-full p-2 border rounded mb-4"
-                        >
-                            <option value="en_attente">En attente</option>
-                            <option value="valide">Validée</option>
-                            <option value="invalide">Refusée</option>
-                        </select>
+                        <h2 className="text-xl font-bold mb-4">Détails de la Commande</h2>
+                        <p className="font-medium">Client : {selectedCommande.client}</p>
+                        <div className="mt-4">
+                            <h3 className="font-semibold mb-2">Produits commandés :</h3>
+                            <ul className="list-disc pl-5">
+                                {selectedCommande.details?.map((detail, index) => (
+                                    <li key={index}>
+                                        {detail.produit} - Quantité: {detail.quantite}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button onClick={closeDetailsModal} className="px-4 py-2 bg-gray-300 rounded">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isEditModalOpen && selectedCommande && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                        <h2 className="text-xl font-bold mb-4">Modifier le Statut de la Commande</h2>
+                        <div className="mt-4">
+                            <label htmlFor="status" className="block font-medium">Statut</label>
+                            <select
+                                id="status"
+                                value={newStatus}
+                                onChange={(e) => setNewStatus(e.target.value)}
+                                className="w-full p-2 border rounded mb-4"
+                            >
+                                <option value="en_attente">En attente</option>
+                                <option value="valide">Validée</option>
+                                <option value="invalide">Refusée</option>
+                            </select>
+                        </div>
                         <div className="flex justify-end gap-2">
-                            <button onClick={closeModal} className="px-4 py-2 bg-gray-300 rounded">Annuler</button>
+                            <button onClick={closeEditModal} className="px-4 py-2 bg-gray-300 rounded">Annuler</button>
                             <button onClick={updateCommandeStatus} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                                 Valider
                             </button>
