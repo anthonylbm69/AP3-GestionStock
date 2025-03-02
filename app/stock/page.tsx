@@ -13,7 +13,6 @@ export default function Page() {
     useEffect(() => {
         if (!isLoading && user) {
             console.log("Utilisateur récupéré :", user);
-            // Convertir idRole en "admin" ou "client"
             const userRole = user.idRole === 1 ? "admin" : user.idRole === 2 ? "client" : null;
             setRole(userRole);
         }

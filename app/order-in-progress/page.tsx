@@ -92,7 +92,6 @@ export default function OrderInProgress() {
         }
 
         for (const item of cart) {
-            // Récupérer la quantité actuelle
             const { data: stockData, error: stockError } = await supabase
                 .from("Stock")
                 .select("quantiteDisponible")
@@ -104,17 +103,14 @@ export default function OrderInProgress() {
                 continue;
             }
 
-            // Calculer la nouvelle quantité
             const newQuantity = stockData.quantiteDisponible - item.quantity;
 
-            // Vérifier que la quantité en stock est suffisante
             if (newQuantity < 0) {
                 console.error(`Stock insuffisant pour ${item.name} !`);
                 alert(`Stock insuffisant pour ${item.name} !`);
-                return; // Stopper la commande si stock insuffisant
+                return;
             }
 
-            // Mettre à jour la quantité du stock
             const { error: updateError } = await supabase
                 .from("Stock")
                 .update({ quantiteDisponible: newQuantity })

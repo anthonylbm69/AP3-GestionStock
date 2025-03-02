@@ -11,7 +11,6 @@ export default function useAuthUser() {
         const fetchUser = async () => {
             setIsLoading(true);
 
-            // Récupérer la session de l'utilisateur
             const { data, error } = await supabase.auth.getSession();
 
             if (error || !data.session) {
@@ -24,10 +23,9 @@ export default function useAuthUser() {
             const { user } = data.session;
             const userId = user.id;
 
-            // Requête pour récupérer les informations utilisateur (nom et idRole)
             const { data: userData, error: userError } = await supabase
                 .from("Utilisateur")
-                .select("nom, idRole")  // Ajout de `idRole`
+                .select("nom, idRole")
                 .eq("id", userId)
                 .single();
 

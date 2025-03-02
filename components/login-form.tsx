@@ -36,7 +36,7 @@ export default function LoginForm() {
                             id="password"
                             name="password"
                             placeholder="••••••••"
-                            type={isPasswordVisible ? "text" : "password"} //
+                            type={isPasswordVisible ? "text" : "password"}
                             required
                         />
                         <button
