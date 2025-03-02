@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/utils/supabase/supabaseClient";
+import {createClient} from "@/utils/supabase/client";
 
 type Stock = {
     id: number;
@@ -16,7 +16,10 @@ export default function OrderInProgress() {
     const router = useRouter();
     const [cart, setCart] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(false);
-    const [userId, setUserId] = useState<number | null>(null); // ID de l'utilisateur connecté
+    const [userId, setUserId] = useState<number | null>(null);
+
+
+    const supabase = createClient();
 
     useEffect(() => {
         const savedCart = localStorage.getItem("cart");
@@ -26,21 +29,26 @@ export default function OrderInProgress() {
 
         const fetchUser = async () => {
             const { data, error } = await supabase.auth.getUser();
-            if (error || !data?.user) {
-                console.error("Erreur lors de la récupération de l'utilisateur :", error);
-                router.push("/login");
-            } else {
-                const { data: userData, error: userError } = await supabase
-                    .from("Utilisateur")
-                    .select("id")
-                    .eq("email", data.user.email)
-                    .single();
+            console.log("Utilisateur récupéré :", data, "Erreur :", error);
 
-                if (userError) {
-                    console.error("Erreur lors de la récupération de l'ID utilisateur :", userError);
-                } else {
-                    setUserId(userData.id);
-                }
+            if (error || !data?.user) {
+                console.error("Utilisateur non connecté !");
+                router.push("/login");
+                return;
+            }
+
+            const userId = data.user.id;
+
+            const { data: userData, error: userError } = await supabase
+                .from("Utilisateur")
+                .select("id")
+                .eq("id", userId)
+                .single();
+
+            if (userError) {
+                console.error("Erreur lors de la récupération de l'ID utilisateur :", userError);
+            } else {
+                setUserId(userData.id);
             }
         };
 
@@ -57,7 +65,7 @@ export default function OrderInProgress() {
 
         const { data: commande, error: commandeError } = await supabase
             .from("Commande")
-            .insert([{ idUtilisateur: userId, dateCommande: new Date() }]) // Ajout de la date actuelle
+            .insert([{ idUtilisateur: userId, dateCommande: new Date() }])
             .select("id")
             .single();
 
@@ -84,15 +92,39 @@ export default function OrderInProgress() {
         }
 
         for (const item of cart) {
-            const { error: stockError } = await supabase
+            // Récupérer la quantité actuelle
+            const { data: stockData, error: stockError } = await supabase
                 .from("Stock")
-                .update({ quantiteDisponible: item.quantity })
+                .select("quantiteDisponible")
+                .eq("id", item.id)
+                .single();
+
+            if (stockError || !stockData) {
+                console.error("Erreur lors de la récupération du stock :", stockError);
+                continue;
+            }
+
+            // Calculer la nouvelle quantité
+            const newQuantity = stockData.quantiteDisponible - item.quantity;
+
+            // Vérifier que la quantité en stock est suffisante
+            if (newQuantity < 0) {
+                console.error(`Stock insuffisant pour ${item.name} !`);
+                alert(`Stock insuffisant pour ${item.name} !`);
+                return; // Stopper la commande si stock insuffisant
+            }
+
+            // Mettre à jour la quantité du stock
+            const { error: updateError } = await supabase
+                .from("Stock")
+                .update({ quantiteDisponible: newQuantity })
                 .eq("id", item.id);
 
-            if (stockError) {
-                console.error("Erreur lors de la mise à jour du stock :", stockError);
+            if (updateError) {
+                console.error("Erreur lors de la mise à jour du stock :", updateError);
             }
         }
+
 
         localStorage.removeItem("cart");
 

@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { FaRegTrashAlt, FaEye } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
+import useAuthUser from "@/lib/auth";
 
 type Stock = {
     id: number;
@@ -24,6 +25,7 @@ type Stock = {
 
 const EditStock = () => {
     const router = useRouter();
+    const { user, isLoading } = useAuthUser();
     const [stock, setStock] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
@@ -38,6 +40,14 @@ const EditStock = () => {
     });
 
     useEffect(() => {
+        if (!isLoading && user) {
+            if (user.idRole !== 1) {
+                router.push("/error");
+            } else {
+                fetchStock();
+            }
+        }
+    }, [user, isLoading]);
         const fetchStock = async () => {
             const { data, error } = await supabase
                 .from("Stock")
@@ -49,9 +59,6 @@ const EditStock = () => {
             }
             setLoading(false);
         };
-
-        fetchStock();
-    }, []);
 
     const handleEdit = (id: number) => {
         router.push(`/edit-stock?id=${id}`);
@@ -101,6 +108,22 @@ const EditStock = () => {
                 type: "",
                 prix: 0,
             });
+
+            const newMouvement = {
+                idStock: data[0].id,
+                type: "entree",
+                quantite: data[0].quantiteDisponible,
+                dateMouvement: new Date().toISOString()
+            };
+
+            const { error: mouvementError } = await supabase
+                .from("Mouvement")
+                .insert([newMouvement]);
+
+            if (mouvementError) {
+                console.log("Données du mouvement :", newMouvement);
+                console.error("Erreur lors de l'ajout du mouvement : ", mouvementError);
+            }
         }
     };
 

@@ -23,8 +23,9 @@ const OrderInterface = () => {
         const fetchMedications = async () => {
             const { data, error } = await supabase.from("Stock").select("*");
             if (error) {
-                console.error("Erreur lors de la récupération des médicaments : ", error);
-            } else {
+                console.error("Erreur lors de la récupération des médicaments :", error.message, error.details);
+            }
+            else {
                 setMedicaments(
                     data?.map((item: any) => ({
                         id: item.id,
@@ -41,7 +42,6 @@ const OrderInterface = () => {
         fetchMedications();
     }, []);
 
-    // Charger le panier depuis localStorage au montage du composant
     useEffect(() => {
         const savedCart = localStorage.getItem("cart");
         if (savedCart) {
@@ -49,7 +49,6 @@ const OrderInterface = () => {
         }
     }, []);
 
-    // Sauvegarder le panier dans localStorage à chaque mise à jour
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(cart));
     }, [cart]);

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/utils/supabase/supabaseClient';
+import useAuthUser from "@/lib/auth";
 
 type Stock = {
     id: number;
@@ -16,6 +17,7 @@ export default function EditOneStock() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const stockId = searchParams.get("id");
+    const { user, isLoading } = useAuthUser();
 
     const [stock, setStock] = useState<Stock | null>(null);
     const [loading, setLoading] = useState(true);
@@ -29,6 +31,15 @@ export default function EditOneStock() {
     });
 
     useEffect(() => {
+        if (!isLoading && user) {
+            if (user.idRole !== 1) {
+                router.push("/error");
+            } else {
+                fetchStockDetails();
+            }
+        }
+    }, [user, isLoading]);
+
         if (!stockId) return;
 
         const fetchStockDetails = async () => {
@@ -47,8 +58,6 @@ export default function EditOneStock() {
             setLoading(false);
         };
 
-        fetchStockDetails();
-    }, [stockId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -61,16 +70,40 @@ export default function EditOneStock() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const { error } = await supabase
+        const ancienneQuantite = stock?.quantiteDisponible;
+        const nouvelleQuantite = formData.quantiteDisponible;
+
+        const { error: updateError } = await supabase
             .from('Stock')
             .update(formData)
             .eq('id', formData.id);
 
-        if (error) {
-            console.error("Erreur lors de la mise à jour du stock :", error);
-        } else {
-            router.push('/gestion-stock');
+        if (updateError) {
+            console.error("Erreur lors de la mise à jour du stock :", updateError);
+            return;
         }
+
+        if (ancienneQuantite !== nouvelleQuantite) {
+            const mouvementType = nouvelleQuantite > ancienneQuantite ? "entree" : "sortie";
+            const quantiteChange = Math.abs(nouvelleQuantite - ancienneQuantite);
+
+            const { error: mouvementError } = await supabase
+                .from('Mouvement')
+                .insert([
+                    {
+                        idStock: formData.id,
+                        type: mouvementType,
+                        quantite: quantiteChange,
+                        dateMouvement: new Date()
+                    }
+                ]);
+
+            if (mouvementError) {
+                console.error("Erreur lors de l'ajout du mouvement :", mouvementError);
+            }
+        }
+
+        router.push('/gestion-stock');
     };
 
     const handleReturn = () => {

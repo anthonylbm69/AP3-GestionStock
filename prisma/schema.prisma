@@ -15,14 +15,12 @@ model Role {
 }
 
 model Utilisateur {
-  id         Int        @id @default(autoincrement())
-  nom        String
-  prenom     String
-  email      String     @unique
-  motDePasse String
-  idRole     Int
-  commandes  Commande[]
-  role       Role       @relation(fields: [idRole], references: [id])
+  id        String     @id @default(uuid()) @db.VarChar(120)
+  nom       String
+  prenom    String
+  idRole    Int
+  commandes Commande[]
+  role      Role       @relation(fields: [idRole], references: [id])
 }
 
 model Stock {
@@ -38,7 +36,7 @@ model Stock {
 
 model Commande {
   id              Int               @id @default(autoincrement())
-  idUtilisateur   Int
+  idUtilisateur   String
   dateCommande    DateTime          @default(now())
   statut          CommandeStatut    @default(en_attente)
   utilisateur     Utilisateur       @relation(fields: [idUtilisateur], references: [id])

@@ -23,7 +23,7 @@ export default function DetailsStock() {
     useEffect(() => {
         if (!stockId) {
             console.error("Aucun ID de stock trouvé dans l'URL");
-            setLoading(false); // Sortir du chargement
+            setLoading(false);
             return;
         }
 

@@ -18,7 +18,7 @@ export default function LoginForm() {
             <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
                 Bienvenue sur Anto'Gestion
             </h2>
-            <form className="my-8" action={signin}>
+            <form className="my-8">
                 <LabelInputContainer className="mb-4">
                     <Label htmlFor="email">Email</Label>
                     <Input

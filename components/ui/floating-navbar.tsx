@@ -52,13 +52,15 @@ export const FloatingNav = ({
 
             if (data.session) {
                 const { user } = data.session;
+                const userId = user.id; 
+
                 const { data: userData, error } = await supabase
                     .from("Utilisateur")
                     .select("nom")
-                    .eq("email", user.email)
+                    .eq("id", userId)
                     .single();
 
-                setUser(error ? { email: user.email } : { email: user.email, nom: userData.nom });
+                setUser(error ? { id: userId } : { id: userId, nom: userData.nom });
             } else {
                 setUser(null);
             }
@@ -80,6 +82,7 @@ export const FloatingNav = ({
             authListener.subscription?.unsubscribe();
         };
     }, [isMounted, router]);
+
 
     useMotionValueEvent(scrollYProgress, "change", (current) => {
         if (!isScrollable) {
