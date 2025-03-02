@@ -33,7 +33,6 @@ export default function Page() {
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-zinc-800">
             <div className="flex flex-row gap-8">
-                {/* Carte pour consulter la liste du stock */}
                 <BackgroundGradient className="rounded-[22px] max-w-md p-4 sm:p-10 bg-white dark:bg-zinc-900 shadow-lg">
                     <Image
                         src={`/stock.jpg`}
