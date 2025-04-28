@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/utils/supabase/supabaseClient';
+import supabase from '@/utils/supabase/supabaseClient';
 
 type Stock = {
     id: number;

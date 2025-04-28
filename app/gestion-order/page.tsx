@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from "@/utils/supabase/supabaseClient";
+import supabase from "@/utils/supabase/supabaseClient";
 import { FaEye, FaEdit } from "react-icons/fa";
 import useAuthUser from "@/lib/auth";
 
