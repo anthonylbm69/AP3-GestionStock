@@ -68,7 +68,7 @@ export default function Page() {
                         </p>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400">
                             Ici, vous pouvez modifier, consulter en détail, ajouter ou supprimer un article de la liste selon vos besoins,
-                            afin de gérer votre stock et d'assurer un suivi optimal.
+                            afin de gérer votre stock et d&apos;assurer un suivi optimal.
                         </p>
                         <button
                             className="rounded-full pl-4 pr-4 py-1 text-white flex items-center space-x-1 bg-black mt-4 text-xs font-bold dark:bg-zinc-800 hover:bg-gray-800 transition"

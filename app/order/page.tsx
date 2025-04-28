@@ -69,7 +69,7 @@ export default function Page() {
                         </p>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400">
                             Anto&apos;Stock, votre plateforme pour commander facilement des matériaux et des médicaments.
-                            Profitez d'une livraison rapide sous 7 jours en France métropolitaine.
+                            Profitez d&apos;une livraison rapide sous 7 jours en France métropolitaine.
                         </p>
                         <button
                             className="rounded-full pl-4 pr-4 py-1 text-white flex items-center space-x-1 bg-black mt-4 text-xs font-bold dark:bg-zinc-800 hover:bg-gray-800 transition"

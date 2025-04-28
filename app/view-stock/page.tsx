@@ -9,7 +9,6 @@ import {
     TableHead,
     TableCell,
 } from "@/components/ui/table";
-import {useRouter} from "next/navigation";
 
 type Stock = {
     id: number;
@@ -21,7 +20,6 @@ type Stock = {
 };
 
 const ViewStock = () => {
-    const router = useRouter();
     const [stock, setStock] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
 
