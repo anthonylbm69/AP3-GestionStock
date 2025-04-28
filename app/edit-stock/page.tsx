@@ -70,18 +70,13 @@ export default function EditOneStock() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const ancienneQuantite = stock?.quantiteDisponible;
-        const nouvelleQuantite = formData.quantiteDisponible;
-
-        const { error: updateError } = await supabase
-            .from('Stock')
-            .update(formData)
-            .eq('id', formData.id);
-
-        if (updateError) {
-            console.error("Erreur lors de la mise à jour du stock :", updateError);
+        if (!stock) {
+            console.error("Stock non chargé");
             return;
         }
+
+        const ancienneQuantite = stock.quantiteDisponible;
+        const nouvelleQuantite = formData.quantiteDisponible;
 
         if (ancienneQuantite !== nouvelleQuantite) {
             const mouvementType = nouvelleQuantite > ancienneQuantite ? "entree" : "sortie";
@@ -103,8 +98,19 @@ export default function EditOneStock() {
             }
         }
 
+        const { error: updateError } = await supabase
+            .from('Stock')
+            .update(formData)
+            .eq('id', formData.id);
+
+        if (updateError) {
+            console.error("Erreur lors de la mise à jour du stock :", updateError);
+            return;
+        }
+
         router.push('/gestion-stock');
     };
+
 
     const handleReturn = () => {
         router.push('/gestion-stock')
