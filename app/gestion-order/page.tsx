@@ -19,6 +19,29 @@ type Commande = {
     details?: DetailCommande[];
 };
 
+type SupabaseStock = {
+    nom: string;
+    prix: number;
+    quantiteDisponible: number;
+};
+
+type SupabaseDetailCommande = {
+    quantite: number;
+    Stock: SupabaseStock;
+};
+
+type SupabaseUtilisateur = {
+    nom: string;
+    prenom: string;
+};
+
+type SupabaseCommande = {
+    id: number;
+    statut: string;
+    Utilisateur: SupabaseUtilisateur[];
+    DetailsCommande: SupabaseDetailCommande[];
+};
+
 export default function Page() {
     const router = useRouter();
     const { user, isLoading } = useAuthUser();
@@ -36,27 +59,28 @@ export default function Page() {
                 fetchCommandes();
             }
         }
-    }, [user, isLoading]);
+    }, [user, isLoading, router]);
+
 
     const fetchCommandes = async () => {
         const { data, error } = await supabase
             .from("Commande")
             .select(`
-        id,
-        statut,
-        Utilisateur (
+      id,
+      statut,
+      Utilisateur (
+        nom,
+        prenom
+      ),
+      DetailsCommande (
+        quantite,
+        Stock (
           nom,
-          prenom
-        ),
-        DetailsCommande (
-          quantite,
-          Stock (
-            nom,
-            prix,
-            quantiteDisponible
-          )
+          prix,
+          quantiteDisponible
         )
-      `);
+      )
+    `);
 
         if (error) {
             console.error("Erreur lors de la récupération des commandes :", error);
@@ -65,17 +89,17 @@ export default function Page() {
 
         if (!data) return;
 
-        const commandesAvecMontant: Commande[] = data.map((commande: any) => {
-            const montantTotal = commande.DetailsCommande?.reduce((total: number, detail: any) => {
+        const commandesAvecMontant: Commande[] = (data as unknown as SupabaseCommande[]).map((commande) => {
+            const montantTotal = commande.DetailsCommande?.reduce((total, detail) => {
                 return total + (detail.quantite * (detail.Stock?.prix || 0));
             }, 0) || 0;
 
             return {
                 id: commande.id,
-                client: `${commande.Utilisateur?.nom || ''} ${commande.Utilisateur?.prenom || ''}`,
+                client: `${commande.Utilisateur[0]?.nom || ''} ${commande.Utilisateur[0]?.prenom || ''}`,
                 montant: montantTotal.toFixed(2),
                 statut: commande.statut,
-                details: commande.DetailsCommande?.map((detail: any) => ({
+                details: commande.DetailsCommande?.map((detail) => ({
                     produit: detail.Stock?.nom || '',
                     quantite: detail.quantite
                 }))
@@ -84,6 +108,7 @@ export default function Page() {
 
         setCommandes(commandesAvecMontant);
     };
+
 
     const openDetailsModal = (commande: Commande) => {
         setSelectedCommande(commande);

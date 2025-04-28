@@ -51,8 +51,9 @@ export const FloatingNav = ({
             const { data } = await supabase.auth.getSession();
 
             if (data.session) {
-                const { user } = data.session;
-                const userId = user.id; 
+                const { user: sessionUser } = data.session;
+                const userId = sessionUser.id;
+                const userEmail = sessionUser.email || "";
 
                 const { data: userData, error } = await supabase
                     .from("Utilisateur")
@@ -60,7 +61,11 @@ export const FloatingNav = ({
                     .eq("id", userId)
                     .single();
 
-                setUser(error ? { id: userId } : { id: userId, nom: userData.nom });
+                if (error || !userData) {
+                    setUser({ email: userEmail });
+                } else {
+                    setUser({ email: userEmail, nom: userData.nom });
+                }
             } else {
                 setUser(null);
             }

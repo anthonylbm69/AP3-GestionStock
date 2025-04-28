@@ -11,18 +11,16 @@ async function main() {
         ],
         skipDuplicates: true,
     });
-
     await prisma.utilisateur.upsert({
-        where: { email: "admin@admin.com" },
+        where: { id: "1" },
         update: {},
         create: {
             nom: "Lyb",
             prenom: "Anto",
-            email: "admin@admin.com",
-            motDePasse: "securepassword",
             idRole: 1,
         },
     });
+
 }
 
 main()

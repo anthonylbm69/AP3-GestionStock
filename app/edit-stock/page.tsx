@@ -1,5 +1,6 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import useAuthUser from "@/lib/auth";
@@ -13,7 +14,7 @@ type Stock = {
     prix: number;
 };
 
-export default function EditOneStock() {
+function EditOneStockForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const stockId = searchParams.get("id");
@@ -40,24 +41,22 @@ export default function EditOneStock() {
         }
     }, [user, isLoading]);
 
-        if (!stockId) return;
+    const fetchStockDetails = async () => {
+        if (!stockId) return; // vérifier ici
+        const { data, error } = await supabase
+            .from('Stock')
+            .select('*')
+            .eq('id', parseInt(stockId))
+            .single();
 
-        const fetchStockDetails = async () => {
-            const { data, error } = await supabase
-                .from('Stock')
-                .select('*')
-                .eq('id', parseInt(stockId))
-                .single();
-
-            if (error) {
-                console.error("Erreur lors de la récupération des détails du stock :", error);
-            } else {
-                setStock(data);
-                setFormData(data);
-            }
-            setLoading(false);
-        };
-
+        if (error) {
+            console.error("Erreur lors de la récupération des détails du stock :", error);
+        } else {
+            setStock(data);
+            setFormData(data);
+        }
+        setLoading(false);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -111,10 +110,9 @@ export default function EditOneStock() {
         router.push('/gestion-stock');
     };
 
-
     const handleReturn = () => {
-        router.push('/gestion-stock')
-    }
+        router.push('/gestion-stock');
+    };
 
     if (loading) return <p>Chargement des données...</p>;
     if (!stock) return <p>Stock non trouvé</p>;
@@ -200,5 +198,13 @@ export default function EditOneStock() {
                 </div>
             </form>
         </div>
+    );
+}
+
+export default function EditOneStockPage() {
+    return (
+        <Suspense fallback={<p>Chargement des données...</p>}>
+            <EditOneStockForm />
+        </Suspense>
     );
 }

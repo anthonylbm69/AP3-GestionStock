@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 export default function useAuthUser() {
@@ -22,6 +22,7 @@ export default function useAuthUser() {
 
             const { user } = data.session;
             const userId = user.id;
+            const userEmail = user.email || "";
 
             const { data: userData, error: userError } = await supabase
                 .from("Utilisateur")
@@ -31,9 +32,9 @@ export default function useAuthUser() {
 
             if (userError || !userData) {
                 console.log("Erreur lors de la récupération de l'utilisateur:", userError?.message);
-                setUser({ id: userId, email: user.email });
+                setUser({ id: userId, email: userEmail });
             } else {
-                setUser({ id: userId, email: user.email, nom: userData.nom, idRole: userData.idRole });
+                setUser({ id: userId, email: userEmail, nom: userData.nom, idRole: userData.idRole });
             }
 
             setIsLoading(false);
@@ -44,4 +45,3 @@ export default function useAuthUser() {
 
     return { user, isLoading };
 }
-
