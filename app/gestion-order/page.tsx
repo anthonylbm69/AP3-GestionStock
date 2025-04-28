@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,11 +6,17 @@ import { supabase } from "@/utils/supabase/supabaseClient";
 import { FaEye, FaEdit } from "react-icons/fa";
 import useAuthUser from "@/lib/auth";
 
+type DetailCommande = {
+    produit: string;
+    quantite: number;
+};
+
 type Commande = {
     id: number;
     client: string;
     montant: string;
     statut: string;
+    details?: DetailCommande[];
 };
 
 export default function Page() {
@@ -36,29 +42,41 @@ export default function Page() {
         const { data, error } = await supabase
             .from("Commande")
             .select(`
-                id,
-                statut,
-                Utilisateur ( nom, prenom ),
-                DetailsCommande ( quantite, Stock ( nom, prix, quantiteDisponible ) )
-            `);
+        id,
+        statut,
+        Utilisateur (
+          nom,
+          prenom
+        ),
+        DetailsCommande (
+          quantite,
+          Stock (
+            nom,
+            prix,
+            quantiteDisponible
+          )
+        )
+      `);
 
         if (error) {
             console.error("Erreur lors de la récupération des commandes :", error);
             return;
         }
 
-        const commandesAvecMontant = data.map((commande) => {
-            const montantTotal = commande.DetailsCommande?.reduce((total, detail) => {
-                return total + (detail.quantite * detail.Stock.prix || 0);
+        if (!data) return;
+
+        const commandesAvecMontant: Commande[] = data.map((commande: any) => {
+            const montantTotal = commande.DetailsCommande?.reduce((total: number, detail: any) => {
+                return total + (detail.quantite * (detail.Stock?.prix || 0));
             }, 0) || 0;
 
             return {
                 id: commande.id,
-                client: `${commande.Utilisateur.nom} ${commande.Utilisateur.prenom}`,
+                client: `${commande.Utilisateur?.nom || ''} ${commande.Utilisateur?.prenom || ''}`,
                 montant: montantTotal.toFixed(2),
                 statut: commande.statut,
-                details: commande.DetailsCommande?.map((detail) => ({
-                    produit: detail.Stock.nom,
+                details: commande.DetailsCommande?.map((detail: any) => ({
+                    produit: detail.Stock?.nom || '',
                     quantite: detail.quantite
                 }))
             };
