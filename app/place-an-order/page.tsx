@@ -27,7 +27,7 @@ const OrderInterface = () => {
             }
             else {
                 setMedicaments(
-                    data?.map((item: any) => ({
+                    data?.map((item: { id: number; nom: string; description: string; quantiteDisponible: number; prix: number }) => ({
                         id: item.id,
                         name: item.nom,
                         description: item.description,

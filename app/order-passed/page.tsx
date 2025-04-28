@@ -19,13 +19,13 @@ export default function Page() {
                 </h1>
                 <p className="text-lg text-gray-600 dark:text-neutral-300 mb-6">
                     Votre commande a bien été passée. Vous recevrez une confirmation par e-mail sous peu.
-                    Notre équipe s'occupe de la préparation et de l'expédition.
+                    Notre équipe s&apos;occupe de la préparation et de l&apos;expédition.
                 </p>
                 <Button
                     className="w-full bg-green-500 text-white rounded-lg py-2 px-4 hover:bg-green-600 transition-all"
                     onClick={handleBackHome}
                 >
-                    Retour à l'accueil
+                    Retour à l&apos;accueil
                 </Button>
             </div>
         </div>

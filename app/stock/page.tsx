@@ -42,10 +42,10 @@ export default function Page() {
                         className="rounded-[22px] object-contain mx-auto"
                     />
                     <p className="text-base sm:text-xl text-black mt-4 mb-2 dark:text-neutral-200">
-                        Liste du stock chez Anto'Stock
+                        Liste du stock chez Anto&apos;Stock
                     </p>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        Ici, vous pourrez consulter en détail le stock d'Anto'Stock, avec toutes les informations nécessaires sur les articles disponibles.
+                        Ici, vous pourrez consulter en détail le stock d&apos;Anto&apos;Stock, avec toutes les informations nécessaires sur les articles disponibles.
                     </p>
                     <button
                         className="rounded-full pl-4 pr-4 py-1 text-white flex items-center space-x-1 bg-black mt-4 text-xs font-bold dark:bg-zinc-800 hover:bg-gray-800 transition"

@@ -44,7 +44,7 @@ export function ChartData() {
     return (
         <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
-                <CardTitle>Nombre d'article commandé</CardTitle>
+                <CardTitle>Nombre d&apos;article commandé</CardTitle>
                 <CardDescription>Janvier - Juin 2025</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
